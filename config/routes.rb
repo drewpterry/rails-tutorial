@@ -1,12 +1,20 @@
 Rails.application.routes.draw do
-  get 'users/new'
+  # get 'sessions/new'
+  get 'users/new' #this enables all the routes for user resource
 
   root 'static_pages#home'
   #wait why can't you use the / symbol
+  #don't forget that there are user routes that we can't see because of rails (ie show, new, create etc)
   get 'help' => 'static_pages#help'
   get 'about' => 'static_pages#about'
   get 'contact' => 'static_pages#contact'
   get 'signup' => 'users#new'
+  
+  #adding these I think overides the default routes
+  get    'login'   => 'sessions#new'
+  post   'login'   => 'sessions#create'
+  delete 'logout'  => 'sessions#destroy'
+  
   resources :users
 
   # root 'application#hello'

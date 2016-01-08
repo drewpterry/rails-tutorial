@@ -13,6 +13,9 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
                                password_confirmation: "bar" }
     end
     assert_template 'users/new'
+    #could make these more explicit, like adding stuff
+    assert_select 'div#error_explanation'
+    assert_select 'div.alert-danger'
   end
   
   test "valid signup information" do
@@ -24,5 +27,7 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
                                               password_confirmation: "password" }
       end
       assert_template 'users/show'
+      assert_not flash.nil?
+      assert is_logged_in? #logged is defined in test helper
     end
 end

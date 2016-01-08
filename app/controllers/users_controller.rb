@@ -11,9 +11,10 @@ class UsersController < ApplicationController
   
   def create
     @user = User.new(user_params)    # Not the final implementation!
-    if @user.save
-        redirect_to @user
-        flash[:success] = "Welcome to the Sample App!"
+    if @user.save #if successful returns true
+      log_in @user
+      redirect_to @user #this is saying to redirect to the show page via Rails magic
+      flash[:success] = "Welcome to the Sample App!"
     else
         render 'new'
     end

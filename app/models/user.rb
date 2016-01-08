@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+  attr_accessor :remember_token #visible to outside of object, can read and write
   #self.email.downcase is optional
   before_save { email.downcase! } #mutates the actual string
   # before_save { self.email = self.email.downcase }
@@ -13,6 +14,32 @@ class User < ActiveRecord::Base
                     
   has_secure_password
   validates :password, presence: true, length: { minimum: 6 }
+  #returns hash digest of given string
+  def User.digest(string)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+                                                  BCrypt::Engine.cost
+    BCrypt::Password.create(string, cost: cost)
+  end
+    #returns a random token
+  def User.new_token #do you have to have User part why can't you just use new_token
+    SecureRandom.urlsafe_base64
+  end
+  
+  def remember
+    self.remember_token = User.new_token
+    #remember digest is a column in the user field
+    update_attribute(:remember_digest, User.digest(remember_token))
+  end
+  
+  def authenticated?(remember_token)
+    return false if remember_digest.nil?
+    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  end
+  
+  def forget
+    update_attribute(:remember_digest, nil)
+    end
+  
 end
 
 # presence true means not blank or nil
