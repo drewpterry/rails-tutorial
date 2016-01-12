@@ -1,7 +1,9 @@
 class User < ActiveRecord::Base
-  attr_accessor :remember_token #visible to outside of object, can read and write
+  attr_accessor :remember_token, :activation_token #visible to outside of object, can read and write
+  before_save :downcase_email
   #self.email.downcase is optional
-  before_save { email.downcase! } #mutates the actual string
+  # before_save { email.downcase! } #mutates the actual string
+  before_create :create_activation_digest
   # before_save { self.email = self.email.downcase }
     #remember parenthesis are optional
   validates(:name, presence: true, length: { maximum: 50 })
@@ -14,6 +16,7 @@ class User < ActiveRecord::Base
                     
   has_secure_password # this separately checks if password is secured including password is nil, so validates allowing nil still works - i dont know why
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+  
   #returns hash digest of given string
   def User.digest(string)
     cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
@@ -31,15 +34,35 @@ class User < ActiveRecord::Base
     update_attribute(:remember_digest, User.digest(remember_token))
   end
   
-  def authenticated?(remember_token)
-    return false if remember_digest.nil?
-    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  def authenticated?(attribute, token)
+    digest = send("#{attribute}_digest") #send lets you call on functions dynamically by calling a string
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
   end
   
   def forget
     update_attribute(:remember_digest, nil)
-    end
-  
+  end
+
+  def activate
+    update_attribute(:activated,    true)
+    update_attribute(:activated_at, Time.zone.now)
+  end
+
+    # Sends activation email.
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
+    private
+      def create_activation_digest
+        self.activation_token  = User.new_token
+        self.activation_digest = User.digest(activation_token)
+      end
+      
+      def downcase_email
+        self.email = email.downcase
+      end
 end
 
 # presence true means not blank or nil
