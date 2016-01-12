@@ -23,6 +23,10 @@ module SessionsHelper
     end
   end
 
+  def current_user?(user)
+   user == current_user
+  end
+
   def logged_in?
     !current_user.nil?
   end
@@ -37,5 +41,15 @@ module SessionsHelper
     forget(current_user)
     session.delete(:user_id)
     @current_user = nil
+  end
+
+  def redirect_back_or(default)
+    redirect_to(session[:forwarding_url] || default)
+    session.delete(:forwarding_url)
+  end
+
+  # Stores the URL trying to be accessed.
+  def store_location
+    session[:forwarding_url] = request.url if request.get? #request.url i think just pulls the current url (has to be get to avoid edge case of someone deleting cookies on a form submission page)
   end
 end

@@ -1,0 +1,15 @@
+<% provide(:title, 'All users') %>
+<h1>All users</h1>
+
+<%= will_paginate %>
+
+<ul class="users">
+<!--commented code does the same thing as this render @users, infers to render all users AND it finds the _users partial -->
+    <%= render @users %>
+  <!-- <% @users.each do |user| %>
+      #rails automatically looks for _user partial
+    <%= render user %>
+  <% end %> -->
+</ul>
+
+<%= will_paginate %>

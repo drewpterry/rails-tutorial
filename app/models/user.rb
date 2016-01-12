@@ -12,8 +12,8 @@ class User < ActiveRecord::Base
                     #automatically assumes uniqueness
                     uniqueness: { case_sensitive: false }
                     
-  has_secure_password
-  validates :password, presence: true, length: { minimum: 6 }
+  has_secure_password # this separately checks if password is secured including password is nil, so validates allowing nil still works - i dont know why
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
   #returns hash digest of given string
   def User.digest(string)
     cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
