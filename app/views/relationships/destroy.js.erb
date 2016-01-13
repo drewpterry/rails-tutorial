@@ -1,0 +1,3 @@
+// I think Rails finds these files automatically (ie create and destroy)
+$("#follow_form").html("<%= escape_javascript(render('users/follow')) %>");
+$("#followers").html('<%= @user.followers.count %>');

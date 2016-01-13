@@ -1,5 +1,14 @@
 class User < ActiveRecord::Base
   has_many :microposts, dependent: :destroy #if user is destroyed all posts are also destroyed
+  has_many :active_relationships, class_name:  "Relationship",
+                                  foreign_key: "follower_id",
+                                  dependent:   :destroy
+  has_many :passive_relationships, class_name:  "Relationship",
+                                   foreign_key: "followed_id",
+                                   dependent:   :destroy
+  has_many :following, through: :active_relationships, source: :followed #rails assumes it is followeds, so we change it to following
+  has_many :followers, through: :passive_relationships, source: :follower #don't source follower because it will automatically truncate followers into follower...but I like it this way better
+
   attr_accessor :remember_token, :activation_token , :reset_token#visible to outside of object, can read and write
   before_save :downcase_email
   #self.email.downcase is optional
@@ -75,6 +84,28 @@ class User < ActiveRecord::Base
     Micropost.where("user_id = ?", id) #putting the question mark escapes characters (avoiding sql injections)
   end
 
+  # Follows a user.
+  def follow(other_user)
+    active_relationships.create(followed_id: other_user.id)
+  end
+
+  # Unfollows a user.
+  def unfollow(other_user)
+    active_relationships.find_by(followed_id: other_user.id).destroy
+  end
+
+  # Returns true if the current user is following the other user.
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
+# return users feed
+  def feed
+    following_ids = "SELECT followed_id FROM relationships
+                    WHERE  follower_id = :user_id"
+    Micropost.where("user_id IN (#{following_ids})
+                    OR user_id = :user_id", user_id: id)
+  end
 
     private
       def create_activation_digest
