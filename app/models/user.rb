@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+  has_many :microposts, dependent: :destroy #if user is destroyed all posts are also destroyed
   attr_accessor :remember_token, :activation_token , :reset_token#visible to outside of object, can read and write
   before_save :downcase_email
   #self.email.downcase is optional
@@ -67,6 +68,13 @@ class User < ActiveRecord::Base
   def password_reset_expired?
     reset_sent_at < 2.hours.ago
   end
+
+  # Defines a proto-feed.
+  # See "Following users" for the full implementation.
+  def feed
+    Micropost.where("user_id = ?", id) #putting the question mark escapes characters (avoiding sql injections)
+  end
+
 
     private
       def create_activation_digest

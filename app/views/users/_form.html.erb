@@ -1,6 +1,6 @@
 <!--remember this @user comes from the controller and it is a new user, so in the html it will know this is a post request -->
 <%= form_for(@user) do |f| %>
-  <%= render 'shared/error_messages', object: @user %>
+  <%= render 'shared/error_messages', object: f.object %>
 
   <%= f.label :name %>
   <%= f.text_field :name, class: 'form-control' %>

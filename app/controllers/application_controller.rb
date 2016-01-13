@@ -7,4 +7,15 @@ class ApplicationController < ActionController::Base
   def hello
     render text: "hello, world!"
   end
+  
+  private
+
+      # Confirms a logged-in user.
+      def logged_in_user #put these here so it can be used by multiple \
+        unless logged_in?
+          store_location
+          flash[:danger] = "Please log in."
+          redirect_to login_url
+        end
+      end
 end
